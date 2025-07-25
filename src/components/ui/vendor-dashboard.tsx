@@ -27,6 +27,7 @@ interface GroupOrder {
   location: string;
   participants: number;
   status: "active" | "completed" | "forming";
+  vendorType: string;
 }
 
 interface VendorDashboardProps {
@@ -49,7 +50,8 @@ export function VendorDashboard({ vendor, onLogout }: VendorDashboardProps) {
       timeLeft: "2h 30m",
       location: "110001",
       participants: 8,
-      status: "active"
+      status: "active",
+      vendorType: "Street Food"
     },
     {
       id: "2", 
@@ -61,7 +63,8 @@ export function VendorDashboard({ vendor, onLogout }: VendorDashboardProps) {
       timeLeft: "4h 15m",
       location: "110001",
       participants: 5,
-      status: "forming"
+      status: "forming",
+      vendorType: "Pani Puri"
     },
     {
       id: "3",
@@ -73,9 +76,16 @@ export function VendorDashboard({ vendor, onLogout }: VendorDashboardProps) {
       timeLeft: "Completed",
       location: "110001",
       participants: 12,
-      status: "completed"
+      status: "completed",
+      vendorType: "Street Food"
     }
   ];
+
+  // Filter groups by vendor type matching
+  const filteredOrders = mockGroupOrders.filter(order => 
+    order.vendorType === vendor.businessType &&
+    (searchTerm === "" || order.product.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -147,17 +157,37 @@ export function VendorDashboard({ vendor, onLogout }: VendorDashboardProps) {
               </CardContent>
             </Card>
 
+            {/* Vendor Type Match Info */}
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="pt-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">Showing groups for:</p>
+                    <p className="text-lg font-semibold text-primary">{vendor.businessType} Vendors</p>
+                  </div>
+                  <Badge variant="outline" className="border-primary text-primary">
+                    {filteredOrders.length} Groups Available
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Group Orders Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {mockGroupOrders.map((order) => (
+              {filteredOrders.map((order) => (
                 <Card key={order.id} className="hover:shadow-[var(--shadow-card)] transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div>
                         <CardTitle className="text-lg">{order.product}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <MapPin className="h-3 w-3 mr-1" />
-                          Pin: {order.location}
+                        <CardDescription className="space-y-1">
+                          <div className="flex items-center">
+                            <MapPin className="h-3 w-3 mr-1" />
+                            Pin: {order.location}
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {order.vendorType} Vendors
+                          </Badge>
                         </CardDescription>
                       </div>
                       <Badge variant={getStatusColor(order.status) as any}>
